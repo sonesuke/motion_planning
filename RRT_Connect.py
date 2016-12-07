@@ -136,7 +136,7 @@ def path(t_init, t_goal):
     if distance(n_goal.q, t_init_last.q) < EPSILON:
         n_init_current = t_init_last
         n_goal_current = n_goal
-    elif ditannce(n_init.q, t_goal_last.q) < EPSILON:
+    elif distance(n_init.q, t_goal_last.q) < EPSILON:
         n_init_current = n_init
         n_goal_current = t_goal_last
 
@@ -152,6 +152,56 @@ def path(t_init, t_goal):
         n_goal_current = n_goal_current.parent
 
     return init_path + goal_path
+
+def is_no_obstacle(q_start, q_end):
+    d = distance(q_start, q_end)
+    q_new = q_start + (q_end - q_start) * EPSILON / d
+
+    while distance(q_new, q_end) > EPSILON:
+        q_new = q_new + (q_end - q_start) * EPSILON / d
+        if in_collision(q_new):
+            return False
+    return True
+
+
+
+def post_process(path, k):
+    ret = path
+
+    ite = 0
+    while ite < k:
+        (i, j) = np.sort(np.random.random_integers(0, len(ret)-1, 2))
+        if i == j:
+            continue
+
+        if len(ret) < 3:
+            break
+        ite += 1
+        if is_no_obstacle(ret[i][0], ret[j][0]):
+            new_ret = []
+            for forward in range(i+1):
+                new_ret.append(ret[forward])
+            for backward in range(j, len(ret)):
+                new_ret.append(ret[backward])
+            ret = new_ret
+
+    print len(path)
+    print len(ret)
+    print ret
+
+    interpolate = []
+    for i in range(len(ret)-1):
+        q_start = ret[i][0]
+        q_end = ret[i+1][0]
+        d = distance(q_start, q_end)
+        q_new = q_start
+        while distance(q_new, q_end) > EPSILON:
+            q_next = q_new + (q_end - q_start) * EPSILON / d
+            interpolate.append((q_new, q_next))
+            q_new = q_next
+
+    interpolate.append(ret[-1])
+    return interpolate
 
 
 def build_rrt_connect(q_init, q_goal, max_iteration):

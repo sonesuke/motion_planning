@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from RRT_Connect import build_rrt_connect
+from RRT_Connect import build_rrt_connect, post_process
 
 class Point:
 
@@ -66,12 +66,11 @@ ax.plot([c[0], a[0]], [c[1], a[1]], 'b-')
 
 
 t1, t2, qs = build_rrt_connect(q_init, q_goal, 1000)
-
-print qs
+qs_new = post_process(qs, 500)
 print len(qs)
-print len(qs[0])
-print qs[0][0][0]
-# qs = [(x, y) for (x, y) in zip(np.linspace(0, 2 * np.pi, 200), np.linspace(0, -2 * np.pi, 200))]
+print len(qs_new)
+
+qs = qs_new
 
 def update_link(link, line, theta):
     link.theta = theta
@@ -92,12 +91,7 @@ def animate(i):
 def init():
     return link1, link2
 
-# ani = animation.FuncAnimation(fig, animate, np.arange(1, len(qs)),
-#         init_func=init, interval=2, blit=False)
-
-ani = animation.FuncAnimation(fig, animate, interval=len(qs))
-
-
+ani = animation.FuncAnimation(fig, animate, interval=10)
 
 plt.xlim(-30, 30)
 plt.ylim(-30, 30)
